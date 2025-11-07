@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ResourceType, Pod, Deployment, DaemonSet, Namespace } from './types';
 import { generateNamespaces, generatePods, generateDeployments, generateDaemonSets } from './mockData';
+import Terminal from './Terminal';
 import './App.css';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   const [daemonSets, setDaemonSets] = useState<DaemonSet[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [filter, setFilter] = useState('');
+  const [showTerminal, setShowTerminal] = useState(false);
 
   useEffect(() => {
     setNamespaces(generateNamespaces());
@@ -81,6 +83,9 @@ function App() {
     } else if (e.key === 'Escape') {
       setFilter('');
       setSelectedNamespace(null);
+    } else if (e.key === 't' && e.ctrlKey) {
+      e.preventDefault();
+      setShowTerminal(prev => !prev);
     }
   }, [selectedResource, currentResources.length]);
 
@@ -259,6 +264,28 @@ function App() {
     return null;
   };
 
+  const handleDeletePod = (name: string, namespace: string) => {
+    setPods(prev => prev.filter(p => !(p.name === name && p.namespace === namespace)));
+  };
+
+  const handleDeleteDeployment = (name: string, namespace: string) => {
+    setDeployments(prev => prev.filter(d => !(d.name === name && d.namespace === namespace)));
+  };
+
+  const handleDeleteDaemonSet = (name: string, namespace: string) => {
+    setDaemonSets(prev => prev.filter(d => !(d.name === name && d.namespace === namespace)));
+  };
+
+  const handleDeleteNamespace = (name: string) => {
+    setNamespaces(prev => prev.filter(n => n.name !== name));
+    setPods(prev => prev.filter(p => p.namespace !== name));
+    setDeployments(prev => prev.filter(d => d.namespace !== name));
+    setDaemonSets(prev => prev.filter(d => d.namespace !== name));
+    if (selectedNamespace === name) {
+      setSelectedNamespace(null);
+    }
+  };
+
   return (
     <div className="app">
       <div className="header">
@@ -304,6 +331,13 @@ function App() {
               DaemonSets
             </button>
           </span>
+          <button
+            className={`terminal-toggle ${showTerminal ? 'active' : ''}`}
+            onClick={() => setShowTerminal(prev => !prev)}
+            title="Toggle Terminal (Ctrl+T)"
+          >
+            Terminal
+          </button>
         </div>
       </div>
       
@@ -314,15 +348,31 @@ function App() {
           {selectedResource === 'pods' && ` Errors: ${pods.filter(p => p.error).length}`}
         </span>
         <span className="status-help">
-          ↑↓ Navigate | Ctrl+N/P Switch Resource | / Filter | Esc Clear
+          ↑↓ Navigate | Ctrl+N/P Switch Resource | / Filter | Esc Clear | Ctrl+T Terminal
         </span>
       </div>
 
-      <div className="main-content">
-        <div className="table-container">
-          {renderTable()}
+      <div className={`content-wrapper ${showTerminal ? 'with-terminal' : ''}`}>
+        <div className={`main-content ${showTerminal ? 'with-terminal' : ''}`}>
+          <div className="table-container">
+            {renderTable()}
+          </div>
+          {getSelectedResourceDetails()}
         </div>
-        {getSelectedResourceDetails()}
+        {showTerminal && (
+          <div className="terminal-wrapper">
+            <Terminal
+              pods={pods}
+              deployments={deployments}
+              daemonSets={daemonSets}
+              namespaces={namespaces}
+              onDeletePod={handleDeletePod}
+              onDeleteDeployment={handleDeleteDeployment}
+              onDeleteDaemonSet={handleDeleteDaemonSet}
+              onDeleteNamespace={handleDeleteNamespace}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
