@@ -56,7 +56,7 @@ function randomAge(): string {
   return `${minutes}m`;
 }
 
-function generatePod(namespace: string, index: number): Pod {
+function generatePod(namespace: string, _index: number): Pod {
   const baseName = randomChoice(podNames);
   const name = `${baseName}-${randomInt(1000, 9999)}-${randomInt(100, 999)}`;
   

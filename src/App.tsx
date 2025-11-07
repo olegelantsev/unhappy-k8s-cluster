@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ResourceType, Pod, Deployment, DaemonSet, Namespace } from './types';
 import { generateNamespaces, generatePods, generateDeployments, generateDaemonSets } from './mockData';
 import Terminal from './Terminal';
@@ -107,7 +107,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {currentResources.map((ns, idx) => (
+              {(currentResources as Namespace[]).map((ns, idx) => (
                 <tr
                   key={ns.name}
                   className={idx === selectedIndex ? 'selected' : ''}
