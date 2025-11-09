@@ -1,6 +1,9 @@
 # K9s-like Cluster Viewer
 
+![Screenshot of the app](./screeshot.png)
+
 A web application that mimics the K9s terminal interface for viewing Kubernetes cluster resources. This app displays namespaces, pods, deployments, and daemonsets with various error states to simulate a "dying cluster" scenario.
+
 
 ## Features
 
